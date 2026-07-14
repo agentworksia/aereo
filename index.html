@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoeMais | Passagens e Milhas</title>
+    <meta
+      name="description"
+      content="Compare voos baratos nas principais companhias aéreas brasileiras e encontre melhores opções para trocar milhas."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Compare. Economize. Viaje melhor.</p>
+          <h1>Voos mais baratos e troca de milhas em um só lugar.</h1>
+          <p class="hero-text">
+            Encontre passagens econômicas da Azul, LATAM e GOL, ou descubra onde vale mais usar seus pontos em programas como Azul Fidelidade, LATAM Pass e Smiles.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-btn" data-tab-target="flights">Buscar passagens</button>
+            <button class="secondary-btn" data-tab-target="miles">Consultar milhas</button>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-card-top">
+            <span>Hoje</span>
+            <strong>+120 rotas monitoradas</strong>
+          </div>
+          <ul>
+            <li>Preços atualizados em tempo real</li>
+            <li>Filtragem por companhia e classe</li>
+            <li>Oportunidades com milhas e cash</li>
+          </ul>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="tabs" role="tablist" aria-label="Tipos de busca">
+          <button class="tab active" data-tab="flights" role="tab" aria-selected="true">Passagens baratas</button>
+          <button class="tab" data-tab="miles" role="tab" aria-selected="false">Troca de milhas</button>
+        </div>
+
+        <section class="panel active" id="flights" role="tabpanel">
+          <form class="search-card">
+            <div class="field">
+              <label for="origin">Origem</label>
+              <input id="origin" type="text" placeholder="São Paulo" />
+            </div>
+            <div class="field">
+              <label for="destination">Destino</label>
+              <input id="destination" type="text" placeholder="Rio de Janeiro" />
+            </div>
+            <div class="field">
+              <label for="date">Data</label>
+              <input id="date" type="date" />
+            </div>
+            <button type="submit">Buscar ofertas</button>
+          </form>
+
+          <div class="results-grid">
+            <article class="result-card">
+              <div class="airline-pill azul">Azul</div>
+              <h3>São Paulo → Rio de Janeiro</h3>
+              <p>Economy • Saída 06:20 • Chegada 07:40</p>
+              <div class="price-row">
+                <span>R$ 189</span>
+                <button>Reservar</button>
+              </div>
+            </article>
+
+            <article class="result-card">
+              <div class="airline-pill latam">LATAM</div>
+              <h3>São Paulo → Belo Horizonte</h3>
+              <p>Economy • Saída 08:10 • Chegada 09:35</p>
+              <div class="price-row">
+                <span>R$ 214</span>
+                <button>Reservar</button>
+              </div>
+            </article>
+
+            <article class="result-card">
+              <div class="airline-pill gol">GOL</div>
+              <h3>São Paulo → Porto Alegre</h3>
+              <p>Economy • Saída 11:45 • Chegada 15:10</p>
+              <div class="price-row">
+                <span>R$ 248</span>
+                <button>Reservar</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="miles" role="tabpanel" hidden>
+          <form class="search-card">
+            <div class="field">
+              <label for="program">Programa</label>
+              <select id="program">
+                <option>Azul Fidelidade</option>
+                <option>LATAM Pass</option>
+                <option>Smiles</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="route">Rota</label>
+              <input id="route" type="text" placeholder="GRU → SSA" />
+            </div>
+            <div class="field">
+              <label for="class">Classe</label>
+              <select id="class">
+                <option>Economy</option>
+                <option>Premium</option>
+                <option>Business</option>
+              </select>
+            </div>
+            <button type="submit">Buscar milhas</button>
+          </form>
+
+          <div class="results-grid">
+            <article class="result-card">
+              <div class="airline-pill fidelidade">Azul Fidelidade</div>
+              <h3>GRU → SSA</h3>
+              <p>Economy • 12.500 pontos + R$ 110</p>
+              <div class="price-row">
+                <span>Boa oferta</span>
+                <button>Ver detalhes</button>
+              </div>
+            </article>
+
+            <article class="result-card">
+              <div class="airline-pill latam">LATAM Pass</div>
+              <h3>GRU → GIG</h3>
+              <p>Premium • 16.000 pontos + R$ 85</p>
+              <div class="price-row">
+                <span>Excelente valor</span>
+                <button>Ver detalhes</button>
+              </div>
+            </article>
+
+            <article class="result-card">
+              <div class="airline-pill smiles">Smiles</div>
+              <h3>GRU → BSB</h3>
+              <p>Business • 24.000 pontos + R$ 150</p>
+              <div class="price-row">
+                <span>Alta demanda</span>
+                <button>Ver detalhes</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
