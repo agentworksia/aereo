@@ -12,7 +12,7 @@ module.exports = async function handler(req, res) {
 
   if (type === 'miles') {
     const programName = program === 'latam' ? 'LATAM Pass' : program === 'smiles' ? 'Smiles' : 'Azul Fidelidade';
-    const routeLabel = route || 'GRU → SSA';
+    const routeLabel = route || (program === 'latam' ? 'GRU → GIG' : program === 'smiles' ? 'GRU → POA' : 'GRU → SSA');
     const siteUrl = program === 'latam'
       ? 'https://beta.latampass.latam.com/br/pt/'
       : program === 'smiles'
