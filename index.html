@@ -6,7 +6,7 @@
     <title>VoeMais | Passagens e Milhas</title>
     <meta
       name="description"
-      content="Compare voos baratos nas principais companhias aéreas brasileiras e encontre melhores opções para trocar milhas."
+      content="Busque voos baratos nas companhias brasileiras e compare opções reais de troca de milhas."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,9 +21,9 @@
       <header class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Compare. Economize. Viaje melhor.</p>
-          <h1>Voos mais baratos e troca de milhas em um só lugar.</h1>
+          <h1>Busca de voos reais e troca de milhas em uma experiência moderna.</h1>
           <p class="hero-text">
-            Encontre passagens econômicas da Azul, LATAM e GOL, ou descubra onde vale mais usar seus pontos em programas como Azul Fidelidade, LATAM Pass e Smiles.
+            Encontre passagens da Azul, LATAM e GOL com origem e destino separados, e veja opções de resgate em programas como Azul Fidelidade, LATAM Pass e Smiles.
           </p>
           <div class="hero-actions">
             <button class="primary-btn" data-tab-target="flights">Buscar passagens</button>
@@ -33,13 +33,13 @@
 
         <div class="hero-card">
           <div class="hero-card-top">
-            <span>Hoje</span>
-            <strong>+120 rotas monitoradas</strong>
+            <span>Agora</span>
+            <strong>Buscas abertas em tempo real</strong>
           </div>
           <ul>
-            <li>Preços atualizados em tempo real</li>
-            <li>Filtragem por companhia e classe</li>
-            <li>Oportunidades com milhas e cash</li>
+            <li>Origem e destino em caixas independentes</li>
+            <li>Links diretos para preços e buscas nas companhias</li>
+            <li>Opções de resgate com milhas e classes</li>
           </ul>
         </div>
       </header>
@@ -51,70 +51,46 @@
         </div>
 
         <section class="panel active" id="flights" role="tabpanel">
-          <form class="search-card">
-            <div class="field">
-              <label for="origin">Origem</label>
-              <input id="origin" type="text" placeholder="São Paulo" />
+          <form class="search-card" id="flight-form">
+            <div class="route-stack">
+              <div class="field route-card">
+                <label for="origin">Origem</label>
+                <input id="origin" type="text" placeholder="Ex.: São Paulo" />
+              </div>
+              <div class="field route-card">
+                <label for="destination">Destino</label>
+                <input id="destination" type="text" placeholder="Ex.: Rio de Janeiro" />
+              </div>
             </div>
-            <div class="field">
-              <label for="destination">Destino</label>
-              <input id="destination" type="text" placeholder="Rio de Janeiro" />
-            </div>
-            <div class="field">
+            <div class="field date-card">
               <label for="date">Data</label>
               <input id="date" type="date" />
             </div>
-            <button type="submit">Buscar ofertas</button>
+            <button type="submit">Buscar voos reais</button>
           </form>
 
-          <div class="results-grid">
-            <article class="result-card">
-              <div class="airline-pill azul">Azul</div>
-              <h3>São Paulo → Rio de Janeiro</h3>
-              <p>Economy • Saída 06:20 • Chegada 07:40</p>
-              <div class="price-row">
-                <span>R$ 189</span>
-                <button>Reservar</button>
-              </div>
-            </article>
+          <p class="status-text" id="flight-status">Digite a rota e abra as buscas diretamente em cada companhia.</p>
 
-            <article class="result-card">
-              <div class="airline-pill latam">LATAM</div>
-              <h3>São Paulo → Belo Horizonte</h3>
-              <p>Economy • Saída 08:10 • Chegada 09:35</p>
-              <div class="price-row">
-                <span>R$ 214</span>
-                <button>Reservar</button>
-              </div>
-            </article>
-
-            <article class="result-card">
-              <div class="airline-pill gol">GOL</div>
-              <h3>São Paulo → Porto Alegre</h3>
-              <p>Economy • Saída 11:45 • Chegada 15:10</p>
-              <div class="price-row">
-                <span>R$ 248</span>
-                <button>Reservar</button>
-              </div>
-            </article>
-          </div>
+          <div class="results-grid" id="flight-results"></div>
         </section>
 
         <section class="panel" id="miles" role="tabpanel" hidden>
-          <form class="search-card">
-            <div class="field">
-              <label for="program">Programa</label>
-              <select id="program">
-                <option>Azul Fidelidade</option>
-                <option>LATAM Pass</option>
-                <option>Smiles</option>
-              </select>
+          <form class="search-card" id="miles-form">
+            <div class="route-stack">
+              <div class="field route-card">
+                <label for="program">Programa</label>
+                <select id="program">
+                  <option>Azul Fidelidade</option>
+                  <option>LATAM Pass</option>
+                  <option>Smiles</option>
+                </select>
+              </div>
+              <div class="field route-card">
+                <label for="route">Rota</label>
+                <input id="route" type="text" placeholder="Ex.: GRU → SSA" />
+              </div>
             </div>
-            <div class="field">
-              <label for="route">Rota</label>
-              <input id="route" type="text" placeholder="GRU → SSA" />
-            </div>
-            <div class="field">
+            <div class="field date-card">
               <label for="class">Classe</label>
               <select id="class">
                 <option>Economy</option>
@@ -125,37 +101,9 @@
             <button type="submit">Buscar milhas</button>
           </form>
 
-          <div class="results-grid">
-            <article class="result-card">
-              <div class="airline-pill fidelidade">Azul Fidelidade</div>
-              <h3>GRU → SSA</h3>
-              <p>Economy • 12.500 pontos + R$ 110</p>
-              <div class="price-row">
-                <span>Boa oferta</span>
-                <button>Ver detalhes</button>
-              </div>
-            </article>
+          <p class="status-text" id="miles-status">Consulte a disponibilidade em programas de pontos com uma busca rápida.</p>
 
-            <article class="result-card">
-              <div class="airline-pill latam">LATAM Pass</div>
-              <h3>GRU → GIG</h3>
-              <p>Premium • 16.000 pontos + R$ 85</p>
-              <div class="price-row">
-                <span>Excelente valor</span>
-                <button>Ver detalhes</button>
-              </div>
-            </article>
-
-            <article class="result-card">
-              <div class="airline-pill smiles">Smiles</div>
-              <h3>GRU → BSB</h3>
-              <p>Business • 24.000 pontos + R$ 150</p>
-              <div class="price-row">
-                <span>Alta demanda</span>
-                <button>Ver detalhes</button>
-              </div>
-            </article>
-          </div>
+          <div class="results-grid" id="miles-results"></div>
         </section>
       </main>
     </div>
