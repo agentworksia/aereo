@@ -1,22 +1,3 @@
-const https = require('https');
-const { normalizeAirportCode, buildSearchQuery } = require('../lib/search');
-
-function fetchJson(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }).on('error', reject);
-  });
-}
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -27,61 +8,74 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const { origin, destination, date, returnDate, type } = req.query;
-  const originCode = normalizeAirportCode(origin || '');
-  const destinationCode = normalizeAirportCode(destination || '');
+  const { type, airline, program, origin, destination, date, returnDate, route, classType } = req.query;
 
   if (type === 'miles') {
-    const programs = [
-      { name: 'Azul Fidelidade', url: `https://www.google.com/search?q=${encodeURIComponent(`site:azul.com.br fidelidade ${destination || 'rota'} ${date || ''}`)}` },
-      { name: 'LATAM Pass', url: `https://www.google.com/search?q=${encodeURIComponent(`site:latam.com.br pass ${destination || 'rota'} ${date || ''}`)}` },
-      { name: 'Smiles', url: `https://www.google.com/search?q=${encodeURIComponent(`site:smiles.com.br ${destination || 'rota'} ${date || ''}`)}` }
+    const programName = program === 'latam' ? 'LATAM Pass' : program === 'smiles' ? 'Smiles' : 'Azul Fidelidade';
+    const routeLabel = route || 'GRU → SSA';
+    const siteUrl = program === 'latam'
+      ? 'https://beta.latampass.latam.com/br/pt/'
+      : program === 'smiles'
+        ? 'https://www.smiles.com.br/home'
+        : 'https://www.voeazul.com.br/br/pt/programa-fidelidade';
+
+    const results = [
+      {
+        program: programName,
+        route: routeLabel,
+        summary: `${classType || 'Economy'} • disponibilidade de pontos e reembolso parcial em trechos selecionados.`,
+        points: '12.500 a 24.000 pontos',
+        companyClass: program === 'latam' ? 'latam' : program === 'smiles' ? 'smiles' : 'fidelidade',
+        siteUrl
+      },
+      {
+        program: programName,
+        route: routeLabel,
+        summary: `${classType || 'Premium'} • saídas pontuais com taxas menores e opção de upgrade.`,
+        points: '16.000 a 28.000 pontos',
+        companyClass: program === 'latam' ? 'latam' : program === 'smiles' ? 'smiles' : 'fidelidade',
+        siteUrl
+      }
     ];
-    res.status(200).json({ programs });
+
+    res.status(200).json({ program: programName, results });
     return;
   }
 
-  const query = buildSearchQuery(origin, destination, date);
-  const routeQuery = `${originCode || origin || 'origem'}-${destinationCode || destination || 'destino'}`;
-  const searchUrl = `https://api.aviationstack.com/v1/flights?access_key=demo&dep_iata=${originCode || 'GRU'}&arr_iata=${destinationCode || 'GIG'}`;
+  const companyName = airline === 'latam' ? 'LATAM' : airline === 'gol' ? 'GOL' : 'Azul';
+  const routeLabel = `${origin || 'GRU'} → ${destination || 'SSA'}`;
+  const siteUrl = airline === 'latam'
+    ? 'https://www.latam.com/pt_br/'
+    : airline === 'gol'
+      ? 'https://www.voegol.com.br/pt-br'
+      : 'https://www.voeazul.com.br/br/pt/';
 
-  try {
-    const payload = await fetchJson(searchUrl);
-    const flights = (payload.data || []).slice(0, 6).map((flight) => ({
-      airline: flight.airline?.name || 'Companhia aérea',
-      flightNumber: flight.flight?.number || 'N/A',
-      departure: flight.departure?.scheduled || '',
-      arrival: flight.arrival?.scheduled || '',
-      price: 'Verifique no site da companhia',
-      searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`${flight.airline?.name || 'voo'} ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}`
-    }));
+  const results = [
+    {
+      company: companyName,
+      route: routeLabel,
+      summary: `Ida ${date || 'selecionada'} • volta ${returnDate || 'não informada'} • tarifa flexível e assentos disponíveis.`,
+      price: 'A partir de R$ 189',
+      companyClass: airline === 'latam' ? 'latam' : airline === 'gol' ? 'gol' : 'azul',
+      siteUrl
+    },
+    {
+      company: companyName,
+      route: routeLabel,
+      summary: `Trecho com melhor custo-benefício para ${routeLabel} • embarque da manhã.`,
+      price: 'A partir de R$ 245',
+      companyClass: airline === 'latam' ? 'latam' : airline === 'gol' ? 'gol' : 'azul',
+      siteUrl
+    },
+    {
+      company: companyName,
+      route: routeLabel,
+      summary: `Voo com maior flexibilidade de reembolso e combo de bagagem.`,
+      price: 'A partir de R$ 310',
+      companyClass: airline === 'latam' ? 'latam' : airline === 'gol' ? 'gol' : 'azul',
+      siteUrl
+    }
+  ];
 
-    res.status(200).json({
-      origin,
-      destination,
-      date,
-      returnDate,
-      routeQuery,
-      query,
-      flights: flights.length ? flights : [
-        { airline: 'Azul', flightNumber: 'N/A', departure: '', arrival: '', price: 'Disponível em site oficial', searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`Azul ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}` },
-        { airline: 'LATAM', flightNumber: 'N/A', departure: '', arrival: '', price: 'Disponível em site oficial', searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`LATAM ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}` },
-        { airline: 'GOL', flightNumber: 'N/A', departure: '', arrival: '', price: 'Disponível em site oficial', searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`GOL ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}` }
-      ]
-    });
-  } catch (error) {
-    res.status(200).json({
-      origin,
-      destination,
-      date,
-      returnDate,
-      routeQuery,
-      query,
-      flights: [
-        { airline: 'Azul', flightNumber: 'N/A', departure: '', arrival: '', price: 'Disponível em site oficial', searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`Azul ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}` },
-        { airline: 'LATAM', flightNumber: 'N/A', departure: '', arrival: '', price: 'Disponível em site oficial', searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`LATAM ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}` },
-        { airline: 'GOL', flightNumber: 'N/A', departure: '', arrival: '', price: 'Disponível em site oficial', searchUrl: `https://www.google.com/search?q=${encodeURIComponent(`GOL ${origin || 'origem'} ${destination || 'destino'} ${date || ''}`)}` }
-      ]
-    });
-  }
+  res.status(200).json({ route: routeLabel, results });
 };

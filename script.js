@@ -1,15 +1,80 @@
 const tabs = document.querySelectorAll('.tab');
 const panels = document.querySelectorAll('.panel');
 
+const AIRPORTS = [
+  { code: 'GRU', label: 'São Paulo (GRU)' },
+  { code: 'GIG', label: 'Rio de Janeiro (GIG)' },
+  { code: 'CNF', label: 'Belo Horizonte (CNF)' },
+  { code: 'SSA', label: 'Salvador (SSA)' },
+  { code: 'POA', label: 'Porto Alegre (POA)' },
+  { code: 'BSB', label: 'Brasília (BSB)' },
+  { code: 'REC', label: 'Recife (REC)' },
+  { code: 'FOR', label: 'Fortaleza (FOR)' },
+  { code: 'CWB', label: 'Curitiba (CWB)' },
+  { code: 'FLN', label: 'Florianópolis (FLN)' }
+];
+
+const routeCatalog = {
+  azul: [
+    { label: 'São Paulo → Salvador', value: 'GRU-SSA', origin: 'GRU', destination: 'SSA' },
+    { label: 'São Paulo → Belo Horizonte', value: 'GRU-CNF', origin: 'GRU', destination: 'CNF' },
+    { label: 'São Paulo → Porto Alegre', value: 'GRU-POA', origin: 'GRU', destination: 'POA' },
+    { label: 'Rio → Salvador', value: 'GIG-SSA', origin: 'GIG', destination: 'SSA' }
+  ],
+  latam: [
+    { label: 'São Paulo → Rio', value: 'GRU-GIG', origin: 'GRU', destination: 'GIG' },
+    { label: 'São Paulo → Brasília', value: 'GRU-BSB', origin: 'GRU', destination: 'BSB' },
+    { label: 'São Paulo → Recife', value: 'GRU-REC', origin: 'GRU', destination: 'REC' },
+    { label: 'Rio → Fortaleza', value: 'GIG-FOR', origin: 'GIG', destination: 'FOR' }
+  ],
+  gol: [
+    { label: 'São Paulo → Brasília', value: 'GRU-BSB', origin: 'GRU', destination: 'BSB' },
+    { label: 'São Paulo → Porto Alegre', value: 'GRU-POA', origin: 'GRU', destination: 'POA' },
+    { label: 'São Paulo → Curitiba', value: 'GRU-CWB', origin: 'GRU', destination: 'CWB' },
+    { label: 'Rio → Florianópolis', value: 'GIG-FLN', origin: 'GIG', destination: 'FLN' }
+  ]
+};
+
+const milesCatalog = {
+  azul: [
+    { label: 'GRU → SSA', value: 'GRU-SSA' },
+    { label: 'GRU → CNF', value: 'GRU-CNF' },
+    { label: 'GIG → FOR', value: 'GIG-FOR' }
+  ],
+  latam: [
+    { label: 'GRU → GIG', value: 'GRU-GIG' },
+    { label: 'GRU → BSB', value: 'GRU-BSB' },
+    { label: 'GRU → REC', value: 'GRU-REC' }
+  ],
+  smiles: [
+    { label: 'GRU → POA', value: 'GRU-POA' },
+    { label: 'GIG → SSA', value: 'GIG-SSA' },
+    { label: 'GRU → CWB', value: 'GRU-CWB' }
+  ]
+};
+
+function populateAirports(select) {
+  select.innerHTML = AIRPORTS.map((airport) => `<option value="${airport.code}">${airport.label}</option>`).join('');
+}
+
+function populateRoutes(select, catalog) {
+  select.innerHTML = catalog.map((route) => `<option value="${route.value}" data-origin="${route.origin}" data-destination="${route.destination}">${route.label}</option>`).join('');
+}
+
+function applySelectedRoute(routeSelect, originSelect, destinationSelect) {
+  const selectedOption = routeSelect.selectedOptions[0];
+  if (!selectedOption) return;
+  originSelect.value = selectedOption.dataset.origin;
+  destinationSelect.value = selectedOption.dataset.destination;
+}
+
 for (const tab of tabs) {
   tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
-
     tabs.forEach((item) => {
       item.classList.toggle('active', item.dataset.tab === target);
       item.setAttribute('aria-selected', item.dataset.tab === target ? 'true' : 'false');
     });
-
     panels.forEach((panel) => {
       panel.hidden = panel.id !== target;
       panel.classList.toggle('active', panel.id === target);
@@ -27,94 +92,98 @@ for (const button of document.querySelectorAll('[data-tab-target]')) {
   });
 }
 
-function formatRoute(origin, destination) {
-  const normalizedOrigin = origin.trim() || 'origem';
-  const normalizedDestination = destination.trim() || 'destino';
-  return `${normalizedOrigin} → ${normalizedDestination}`;
-}
+const airlineSelect = document.getElementById('airline');
+const routeSelect = document.getElementById('routeSuggestion');
+const originSelect = document.getElementById('origin');
+const destinationSelect = document.getElementById('destination');
+const programSelect = document.getElementById('program');
+const milesRouteSelect = document.getElementById('milesRoute');
 
-async function fetchFlights(origin, destination, date, returnDate) {
-  const params = new URLSearchParams({ origin, destination, date, returnDate, type: 'flights' });
-  const response = await fetch(`/api/search?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error('Falha ao buscar voos');
-  }
-  return response.json();
-}
+populateAirports(originSelect);
+populateAirports(destinationSelect);
+populateRoutes(routeSelect, routeCatalog.azul);
+populateRoutes(milesRouteSelect, milesCatalog.azul);
 
-async function fetchMiles(program, route, date) {
-  const params = new URLSearchParams({ type: 'miles', program, route, date });
-  const response = await fetch(`/api/search?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error('Falha ao buscar milhas');
-  }
-  return response.json();
-}
-
-async function renderFlights(origin, destination, date, returnDate) {
-  const resultsContainer = document.getElementById('flight-results');
-  const status = document.getElementById('flight-status');
-  status.textContent = `Buscando voos reais para ${formatRoute(origin, destination)}...`;
-  resultsContainer.innerHTML = '<p class="status-text">Carregando opções...</p>';
-
-  try {
-    const data = await fetchFlights(origin, destination, date, returnDate);
-    resultsContainer.innerHTML = data.flights.map((flight) => `
-      <article class="result-card">
-        <div class="airline-pill azul">${flight.airline}</div>
-        <h3>${formatRoute(origin, destination)}</h3>
-        <p>${flight.flightNumber} • Ida: ${flight.departure || 'não informado'} • Volta: ${returnDate || 'não informada'}</p>
-        <div class="action-row">
-          <span class="link-btn">${flight.price}</span>
-          <a class="link-btn" href="${flight.searchUrl}" target="_blank" rel="noopener noreferrer">Abrir busca</a>
-        </div>
-      </article>
-    `).join('');
-    status.textContent = `Resultados para ${formatRoute(origin, destination)} com ida ${date || 'não informada'} e volta ${returnDate || 'não informada'}.`;
-  } catch (error) {
-    resultsContainer.innerHTML = '<p class="status-text">Não foi possível carregar os resultados neste momento.</p>';
-    status.textContent = 'Não foi possível consultar os voos no momento.';
-  }
-}
-
-async function renderMiles(program, route, date) {
-  const resultsContainer = document.getElementById('miles-results');
-  const status = document.getElementById('miles-status');
-  status.textContent = `Buscando programas de milhas para ${route || 'a rota selecionada'}...`;
-  resultsContainer.innerHTML = '<p class="status-text">Carregando opções...</p>';
-
-  try {
-    const data = await fetchMiles(program, route, date);
-    resultsContainer.innerHTML = data.programs.map((item) => `
-      <article class="result-card">
-        <div class="airline-pill fidelidade">${item.name}</div>
-        <h3>${route || 'Rota em análise'}</h3>
-        <p>Disponibilidade de pontos e regras de resgate.</p>
-        <div class="action-row">
-          <a class="link-btn" href="${item.url}" target="_blank" rel="noopener noreferrer">Abrir busca</a>
-        </div>
-      </article>
-    `).join('');
-    status.textContent = `Consulta enviada para ${program} com a rota ${route || 'selecionada'}.`;
-  } catch (error) {
-    resultsContainer.innerHTML = '<p class="status-text">Não foi possível carregar as opções de milhas no momento.</p>';
-    status.textContent = 'Não foi possível consultar as milhas neste momento.';
-  }
-}
-
-document.getElementById('flight-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const origin = document.getElementById('origin').value;
-  const destination = document.getElementById('destination').value;
-  const date = document.getElementById('date').value;
-  const returnDate = document.getElementById('returnDate').value;
-  renderFlights(origin, destination, date, returnDate);
+airlineSelect.addEventListener('change', () => {
+  populateRoutes(routeSelect, routeCatalog[airlineSelect.value] || routeCatalog.azul);
+  applySelectedRoute(routeSelect, originSelect, destinationSelect);
 });
 
-document.getElementById('miles-form').addEventListener('submit', (event) => {
-  event.preventDefault();
-  const program = document.getElementById('program').value;
-  const route = document.getElementById('route').value;
-  const date = document.getElementById('milesDate').value;
-  renderMiles(program, route, date);
+routeSelect.addEventListener('change', () => {
+  applySelectedRoute(routeSelect, originSelect, destinationSelect);
 });
+
+programSelect.addEventListener('change', () => {
+  populateRoutes(milesRouteSelect, milesCatalog[programSelect.value] || milesCatalog.azul);
+});
+
+function renderFlightsResult(results) {
+  const container = document.getElementById('flight-results');
+  container.innerHTML = results.map((result) => `
+    <article class="result-card">
+      <div class="airline-pill ${result.companyClass}">${result.company}</div>
+      <h3>${result.route}</h3>
+      <p>${result.summary}</p>
+      <div class="action-row">
+        <span class="link-btn">${result.price}</span>
+        <a class="link-btn" href="${result.siteUrl}" target="_blank" rel="noopener noreferrer">Abrir site oficial</a>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderMilesResult(results) {
+  const container = document.getElementById('miles-results');
+  container.innerHTML = results.map((result) => `
+    <article class="result-card">
+      <div class="airline-pill ${result.companyClass}">${result.program}</div>
+      <h3>${result.route}</h3>
+      <p>${result.summary}</p>
+      <div class="action-row">
+        <span class="link-btn">${result.points}</span>
+        <a class="link-btn" href="${result.siteUrl}" target="_blank" rel="noopener noreferrer">Abrir programa</a>
+      </div>
+    </article>
+  `).join('');
+}
+
+async function searchFlights() {
+  const params = new URLSearchParams({
+    type: 'flights',
+    airline: airlineSelect.value,
+    origin: originSelect.value,
+    destination: destinationSelect.value,
+    date: document.getElementById('date').value,
+    returnDate: document.getElementById('returnDate').value
+  });
+  const response = await fetch(`/api/search?${params.toString()}`);
+  const data = await response.json();
+  renderFlightsResult(data.results || []);
+  document.getElementById('flight-status').textContent = `Exibindo ${data.results.length} opções para ${data.route}`;
+}
+
+async function searchMiles() {
+  const params = new URLSearchParams({
+    type: 'miles',
+    program: programSelect.value,
+    route: milesRouteSelect.value,
+    date: document.getElementById('milesDate').value,
+    classType: document.getElementById('milesClass').value
+  });
+  const response = await fetch(`/api/search?${params.toString()}`);
+  const data = await response.json();
+  renderMilesResult(data.results || []);
+  document.getElementById('miles-status').textContent = `Exibindo ${data.results.length} opções para o programa ${data.program}`;
+}
+
+document.getElementById('flight-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await searchFlights();
+});
+
+document.getElementById('miles-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await searchMiles();
+});
+
+applySelectedRoute(routeSelect, originSelect, destinationSelect);

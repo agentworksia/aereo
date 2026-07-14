@@ -21,9 +21,9 @@
       <header class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Compare. Economize. Viaje melhor.</p>
-          <h1>Busca de voos reais e troca de milhas em uma experiência moderna.</h1>
+          <h1>Resultados dentro da página para voos e milhas.</h1>
           <p class="hero-text">
-            Encontre passagens da Azul, LATAM e GOL com origem e destino separados, e veja opções de resgate em programas como Azul Fidelidade, LATAM Pass e Smiles.
+            Selecione a companhia aérea, o programa de pontos e a rota desejada para receber sugestões diretamente na página, com dados estruturados para Azul, LATAM, GOL e Smiles.
           </p>
           <div class="hero-actions">
             <button class="primary-btn" data-tab-target="flights">Buscar passagens</button>
@@ -34,12 +34,12 @@
         <div class="hero-card">
           <div class="hero-card-top">
             <span>Agora</span>
-            <strong>Buscas abertas em tempo real</strong>
+            <strong>Busca integrada e sem sair da página</strong>
           </div>
           <ul>
-            <li>Origem e destino em caixas independentes</li>
-            <li>Links diretos para preços e buscas nas companhias</li>
-            <li>Opções de resgate com milhas e classes</li>
+            <li>Origem e destino em seleções claras</li>
+            <li>Rotas sugeridas conforme a companhia</li>
+            <li>Programas Azul Fidelidade, LATAM Pass e Smiles</li>
           </ul>
         </div>
       </header>
@@ -52,55 +52,62 @@
 
         <section class="panel active" id="flights" role="tabpanel">
           <form class="search-card" id="flight-form">
-            <div class="route-stack">
-              <div class="field route-card">
-                <label for="origin">Origem</label>
-                <input id="origin" type="text" placeholder="Ex.: São Paulo" required />
-              </div>
-              <div class="field route-card">
-                <label for="destination">Destino</label>
-                <input id="destination" type="text" placeholder="Ex.: Rio de Janeiro" required />
-              </div>
+            <div class="field">
+              <label for="airline">Companhia aérea</label>
+              <select id="airline">
+                <option value="azul">Azul</option>
+                <option value="latam">LATAM</option>
+                <option value="gol">GOL</option>
+              </select>
             </div>
-            <div class="field date-card">
+            <div class="field">
+              <label for="routeSuggestion">Rota sugerida</label>
+              <select id="routeSuggestion"></select>
+            </div>
+            <div class="field">
+              <label for="origin">Origem</label>
+              <select id="origin"></select>
+            </div>
+            <div class="field">
+              <label for="destination">Destino</label>
+              <select id="destination"></select>
+            </div>
+            <div class="field">
               <label for="date">Ida</label>
               <input id="date" type="date" required />
             </div>
-            <div class="field date-card">
+            <div class="field">
               <label for="returnDate">Volta</label>
               <input id="returnDate" type="date" />
             </div>
-            <button type="submit">Buscar voos reais</button>
+            <button type="submit">Buscar voos</button>
           </form>
 
-          <p class="status-text" id="flight-status">Selecione origem, destino, data de ida e retorno para encontrar voos reais.</p>
-
+          <p class="status-text" id="flight-status">Selecione a companhia e a rota para visualizar os resultados na própria página.</p>
           <div class="results-grid" id="flight-results"></div>
         </section>
 
         <section class="panel" id="miles" role="tabpanel" hidden>
           <form class="search-card" id="miles-form">
-            <div class="route-stack">
-              <div class="field route-card">
-                <label for="program">Programa</label>
-                <select id="program">
-                  <option>Azul Fidelidade</option>
-                  <option>LATAM Pass</option>
-                  <option>Smiles</option>
-                </select>
-              </div>
-              <div class="field route-card">
-                <label for="route">Rota</label>
-                <input id="route" type="text" placeholder="Ex.: GRU → SSA" required />
-              </div>
+            <div class="field">
+              <label for="program">Programa de pontos</label>
+              <select id="program">
+                <option value="azul">Azul Fidelidade</option>
+                <option value="latam">LATAM Pass</option>
+                <option value="smiles">Smiles</option>
+              </select>
             </div>
-            <div class="field date-card">
+            <div class="field">
+              <label for="milesRoute">Rota sugerida</label>
+              <select id="milesRoute"></select>
+            </div>
+            <div class="field">
               <label for="milesDate">Data</label>
               <input id="milesDate" type="date" />
             </div>
-            <div class="field date-card">
-              <label for="class">Classe</label>
-              <select id="class">
+            <div class="field">
+              <label for="milesClass">Classe</label>
+              <select id="milesClass">
                 <option>Economy</option>
                 <option>Premium</option>
                 <option>Business</option>
@@ -109,8 +116,7 @@
             <button type="submit">Buscar milhas</button>
           </form>
 
-          <p class="status-text" id="miles-status">Consulte a disponibilidade de milhas em programas de pontos com a rota e data escolhidas.</p>
-
+          <p class="status-text" id="miles-status">Confira as opções do programa de pontos diretamente abaixo.</p>
           <div class="results-grid" id="miles-results"></div>
         </section>
       </main>
