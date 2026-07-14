@@ -55,21 +55,25 @@
             <div class="route-stack">
               <div class="field route-card">
                 <label for="origin">Origem</label>
-                <input id="origin" type="text" placeholder="Ex.: São Paulo" />
+                <input id="origin" type="text" placeholder="Ex.: São Paulo" required />
               </div>
               <div class="field route-card">
                 <label for="destination">Destino</label>
-                <input id="destination" type="text" placeholder="Ex.: Rio de Janeiro" />
+                <input id="destination" type="text" placeholder="Ex.: Rio de Janeiro" required />
               </div>
             </div>
             <div class="field date-card">
-              <label for="date">Data</label>
-              <input id="date" type="date" />
+              <label for="date">Ida</label>
+              <input id="date" type="date" required />
+            </div>
+            <div class="field date-card">
+              <label for="returnDate">Volta</label>
+              <input id="returnDate" type="date" />
             </div>
             <button type="submit">Buscar voos reais</button>
           </form>
 
-          <p class="status-text" id="flight-status">Digite a rota e abra as buscas diretamente em cada companhia.</p>
+          <p class="status-text" id="flight-status">Selecione origem, destino, data de ida e retorno para encontrar voos reais.</p>
 
           <div class="results-grid" id="flight-results"></div>
         </section>
@@ -87,8 +91,12 @@
               </div>
               <div class="field route-card">
                 <label for="route">Rota</label>
-                <input id="route" type="text" placeholder="Ex.: GRU → SSA" />
+                <input id="route" type="text" placeholder="Ex.: GRU → SSA" required />
               </div>
+            </div>
+            <div class="field date-card">
+              <label for="milesDate">Data</label>
+              <input id="milesDate" type="date" />
             </div>
             <div class="field date-card">
               <label for="class">Classe</label>
@@ -101,7 +109,7 @@
             <button type="submit">Buscar milhas</button>
           </form>
 
-          <p class="status-text" id="miles-status">Consulte a disponibilidade em programas de pontos com uma busca rápida.</p>
+          <p class="status-text" id="miles-status">Consulte a disponibilidade de milhas em programas de pontos com a rota e data escolhidas.</p>
 
           <div class="results-grid" id="miles-results"></div>
         </section>

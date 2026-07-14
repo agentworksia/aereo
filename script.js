@@ -33,77 +33,73 @@ function formatRoute(origin, destination) {
   return `${normalizedOrigin} → ${normalizedDestination}`;
 }
 
-function buildPriceUrl(origin, destination, date) {
-  const query = [
-    'Flights',
-    'from',
-    origin.trim() || 'origem',
-    'to',
-    destination.trim() || 'destino',
-    'on',
-    date || 'today'
-  ].join(' ');
-  return `https://www.google.com/travel/flights?q=${encodeURIComponent(query)}`;
+async function fetchFlights(origin, destination, date, returnDate) {
+  const params = new URLSearchParams({ origin, destination, date, returnDate, type: 'flights' });
+  const response = await fetch(`/api/search?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error('Falha ao buscar voos');
+  }
+  return response.json();
 }
 
-function buildCompanySearchUrl(company, origin, destination, date) {
-  const query = `${company} ${origin.trim() || 'origem'} ${destination.trim() || 'destino'} ${date || ''}`.trim();
-  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+async function fetchMiles(program, route, date) {
+  const params = new URLSearchParams({ type: 'miles', program, route, date });
+  const response = await fetch(`/api/search?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error('Falha ao buscar milhas');
+  }
+  return response.json();
 }
 
-function renderFlights(origin, destination, date) {
+async function renderFlights(origin, destination, date, returnDate) {
   const resultsContainer = document.getElementById('flight-results');
   const status = document.getElementById('flight-status');
-  status.textContent = `Consultando voos reais para ${formatRoute(origin, destination)}.`;
+  status.textContent = `Buscando voos reais para ${formatRoute(origin, destination)}...`;
+  resultsContainer.innerHTML = '<p class="status-text">Carregando opções...</p>';
 
-  const airlines = [
-    { name: 'Azul', className: 'azul', key: 'azul' },
-    { name: 'LATAM', className: 'latam', key: 'latam' },
-    { name: 'GOL', className: 'gol', key: 'gol' }
-  ];
-
-  resultsContainer.innerHTML = airlines.map((airline) => {
-    const priceUrl = buildPriceUrl(origin, destination, date);
-    const companyUrl = buildCompanySearchUrl(airline.name, origin, destination, date);
-    return `
+  try {
+    const data = await fetchFlights(origin, destination, date, returnDate);
+    resultsContainer.innerHTML = data.flights.map((flight) => `
       <article class="result-card">
-        <div class="airline-pill ${airline.className}">${airline.name}</div>
+        <div class="airline-pill azul">${flight.airline}</div>
         <h3>${formatRoute(origin, destination)}</h3>
-        <p>Busca real para preços e disponibilidade na companhia.</p>
+        <p>${flight.flightNumber} • Ida: ${flight.departure || 'não informado'} • Volta: ${returnDate || 'não informada'}</p>
         <div class="action-row">
-          <a class="link-btn" href="${priceUrl}" target="_blank" rel="noopener noreferrer">Ver preços</a>
-          <a class="link-btn" href="${companyUrl}" target="_blank" rel="noopener noreferrer">Abrir busca</a>
+          <span class="link-btn">${flight.price}</span>
+          <a class="link-btn" href="${flight.searchUrl}" target="_blank" rel="noopener noreferrer">Abrir busca</a>
         </div>
       </article>
-    `;
-  }).join('');
+    `).join('');
+    status.textContent = `Resultados para ${formatRoute(origin, destination)} com ida ${date || 'não informada'} e volta ${returnDate || 'não informada'}.`;
+  } catch (error) {
+    resultsContainer.innerHTML = '<p class="status-text">Não foi possível carregar os resultados neste momento.</p>';
+    status.textContent = 'Não foi possível consultar os voos no momento.';
+  }
 }
 
-function renderMiles(program, route) {
+async function renderMiles(program, route, date) {
   const resultsContainer = document.getElementById('miles-results');
   const status = document.getElementById('miles-status');
-  status.textContent = `Consultando o programa ${program} para ${route || 'a rota selecionada'}.`;
+  status.textContent = `Buscando programas de milhas para ${route || 'a rota selecionada'}...`;
+  resultsContainer.innerHTML = '<p class="status-text">Carregando opções...</p>';
 
-  const programs = [
-    { name: 'Azul Fidelidade', className: 'fidelidade', search: 'site:azul.com.br fidelidade' },
-    { name: 'LATAM Pass', className: 'latam', search: 'site:latam.com.br pass' },
-    { name: 'Smiles', className: 'smiles', search: 'site:smiles.com.br' }
-  ];
-
-  resultsContainer.innerHTML = programs.map((item) => {
-    const query = `${item.search} ${route || 'rota'}`.trim();
-    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    return `
+  try {
+    const data = await fetchMiles(program, route, date);
+    resultsContainer.innerHTML = data.programs.map((item) => `
       <article class="result-card">
-        <div class="airline-pill ${item.className}">${item.name}</div>
+        <div class="airline-pill fidelidade">${item.name}</div>
         <h3>${route || 'Rota em análise'}</h3>
-        <p>Consulte a disponibilidade de milhas e regras de resgate.</p>
+        <p>Disponibilidade de pontos e regras de resgate.</p>
         <div class="action-row">
-          <a class="link-btn" href="${url}" target="_blank" rel="noopener noreferrer">Abrir busca</a>
+          <a class="link-btn" href="${item.url}" target="_blank" rel="noopener noreferrer">Abrir busca</a>
         </div>
       </article>
-    `;
-  }).join('');
+    `).join('');
+    status.textContent = `Consulta enviada para ${program} com a rota ${route || 'selecionada'}.`;
+  } catch (error) {
+    resultsContainer.innerHTML = '<p class="status-text">Não foi possível carregar as opções de milhas no momento.</p>';
+    status.textContent = 'Não foi possível consultar as milhas neste momento.';
+  }
 }
 
 document.getElementById('flight-form').addEventListener('submit', (event) => {
@@ -111,12 +107,14 @@ document.getElementById('flight-form').addEventListener('submit', (event) => {
   const origin = document.getElementById('origin').value;
   const destination = document.getElementById('destination').value;
   const date = document.getElementById('date').value;
-  renderFlights(origin, destination, date);
+  const returnDate = document.getElementById('returnDate').value;
+  renderFlights(origin, destination, date, returnDate);
 });
 
 document.getElementById('miles-form').addEventListener('submit', (event) => {
   event.preventDefault();
   const program = document.getElementById('program').value;
   const route = document.getElementById('route').value;
-  renderMiles(program, route);
+  const date = document.getElementById('milesDate').value;
+  renderMiles(program, route, date);
 });
